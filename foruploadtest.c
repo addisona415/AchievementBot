@@ -18,7 +18,7 @@
 
      // Create Server Client Strings
      bzero(hdr, sizeof(hdr));
-     strcpy(hdr, "GET /ISteamUserStats/GetPlayerAchievements/v1/?key=X&steamid=76561198081270242&appid=473690");
+     strcpy(hdr, "GET /ISteamUserStats/GetPlayerAchievements/v1/?key=X&steamid=X&appid=473690");
      strcat(hdr, "api.steampowered.com\r\n");
 
      // Clean things up a bit before starting
