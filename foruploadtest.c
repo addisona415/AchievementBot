@@ -11,15 +11,17 @@
 
      // Define some parameters
      WSADATA wsaData;
-     int sockfd, bytes_read, iResult;
+     int sockfd, bytes_read, iResult, j;
+     struct hostent *remoteHost;
+     char *host_name = "api.steampowered.com";
      struct sockaddr_in dest;
-     char buffer[4000];
+     char buffer[2000];
      char hdr[1000];
 
      // Create Server Client Strings
      bzero(hdr, sizeof(hdr));
-     strcpy(hdr, "GET /ISteamUserStats/GetPlayerAchievements/v1/?key=X&steamid=X&appid=473690");
-     strcat(hdr, "api.steampowered.com\r\n");
+     strcpy(hdr, "GET http://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=X&steamid=X&appid=473690\n");
+     //strcat(hdr, "api.steampowered.com\r\n");
 
      // Clean things up a bit before starting
      printf("\n\n");
@@ -31,6 +33,13 @@
     return 1;
     }
 
+     // Build the address
+     remoteHost = gethostbyname(host_name);
+     if (remoteHost == NULL) {
+        printf("error: gethostbyname(\"%s\")\n", host_name);
+        return 0;
+    }
+
     // Create Socket
     if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
           printf("Socket not created\n");
@@ -40,29 +49,28 @@
     // Initialize server address/port struct
     bzero(&dest, sizeof(dest));
      dest.sin_family = AF_INET;
-    dest.sin_port = htons(443);
+    dest.sin_port = htons(80);
 
     // *** Added this line to fix the code ***
-    dest.sin_addr.s_addr = inet_addr("208.64.202.0");
+    dest.sin_addr.s_addr = inet_addr("23.63.165.179");
 
     dest.sin_family = AF_INET;
-    dest.sin_port = htons(443);
-    if ( inet_addr("208.64.202.0") == 0 ) {
+    dest.sin_port = htons(80);
+    if ( inet_addr("23.63.165.179") == 0 ) {
          printf("Incorrect Address Expression\n");
          return 0;
     }
 
     // Connect Socket
     if ( connect(sockfd, (struct sockaddr*)&dest, sizeof(struct sockaddr_in)) != 0 ) {
-         printf("Socket Connection Failed %s%d\n", strerror(errno), WSAGetLastError());
+         printf("Socket Connection Failed %s, %d\n", strerror(errno), WSAGetLastError());
          close(sockfd);
          WSACleanup();
          return 0;
     }
-
     // Send data
     if (send(sockfd, hdr, strlen(hdr), 0) < 0) {
-         printf("Send Data Failed\n");
+         printf("Send Data Failed, %d\n", WSAGetLastError());
          return 0;
     }
 
@@ -74,7 +82,7 @@
     bytes_read = recv(sockfd, buffer, sizeof(buffer), 0);
 
     if (bytes_read < 0) {
-         printf("Read Data Failed\n");
+         printf("Read Data Failed %s, %d\n", strerror(errno), WSAGetLastError());
     }
 
     if (bytes_read > 0) {
